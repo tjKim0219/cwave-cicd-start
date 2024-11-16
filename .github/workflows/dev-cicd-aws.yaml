@@ -164,8 +164,8 @@ jobs:
     #     fi
 
   load-test:
-    runs-on: ubuntu-latest
     environment: runner
+    runs-on: ubuntu-latest
     services:
       mysql:
         image: mysql:8.0
