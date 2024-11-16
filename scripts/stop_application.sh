@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 # 이전 프로세스 종료
 CURRENT_PID=$(pgrep -f istory-*.jar)
@@ -10,4 +9,3 @@ else
     kill -15 $CURRENT_PID
     sleep 5
 fi
-```
