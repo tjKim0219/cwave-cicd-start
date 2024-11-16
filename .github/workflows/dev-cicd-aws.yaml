@@ -202,9 +202,39 @@ jobs:
                 show-details: always
           EOF
           
-      - name: Configure AWS credentials
+      - name: AWS 접속정보
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2  # 
+
+      - name: JDK 17 설치하기
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: 실행 가능한 JAR 빌드
+        run: |
+          chmod +x gradlew
+          ./gradlew bootJar
+
+      - name: 아티팩트 이름 만들기
+        run: |
+          echo "ARTIFACT_NAME=springboot-$(date +'%Y%m%d-%H%M%S').jar" >> $GITHUB_ENV
+
+      - name: AWS Code Deploy 패키지 만들기 # (appspec.ymd, scripts, zip) 
+        run: |
+          mkdir -p deployment
+          cp build/libs/*.jar deployment/${{ env.ARTIFACT_NAME }}
+          cp appspec.yml deployment/
+          cp -r scripts deployment/
+          cd deployment && zip -r ../deploy.zip . 
+
+      - name: 아티팩트 및 배포 패키지 S3 업로드
+        run: |
+          # JAR 파일 업로드
+          aws s3 cp deployment/${{ env.ARTIFACT_NAME }} s3://${{ secrets.AWS_S3_BUCKET }}/artifacts/
+          # 배포 패키지 업로드
+          aws s3 cp deploy.zip s3://${{ secrets.AWS_S3_BUCKET }}/deploy/deploy.zip
