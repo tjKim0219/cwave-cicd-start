@@ -109,3 +109,14 @@ jobs:
         name: checkstyle-report
         path: build/reports/checkstyle/
         retention-days: 14
+
+    - name: 업로드 결과 Step Summary 에 요약하기
+      run: |
+        echo "## 코드 스타일 분석결과" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -f build/reports/checkstyle/main.xml ]; then # 소스분석결과 존재시
+          echo "### 소스분석결과" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat build/reports/checkstyle/main.xml >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
